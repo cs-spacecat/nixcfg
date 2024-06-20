@@ -8,22 +8,25 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      (import "${builtins.fetchTarball "https://github.com/rycee/home-manager/archive/master.tar.gz"}/nixos")
     ];
+
+  # enable auto updates
+  system.autoUpgrade.enable = true;
 
   # Bootloader.
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/vda";
   boot.loader.grub.useOSProber = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "Kommandozentrale";
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
   networking.networkmanager.enable = true;
+
+  networking.firewall.allowedTCPPorts = [];
+  networking.firewall.allowedUDPPorts = [];
 
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
@@ -45,11 +48,9 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
-  #services.gnome.core-utilities.enable = false;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -60,38 +61,131 @@
   # Configure console keymap
   console.keyMap = "de";
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
+  # experimental features
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.spacecat = {
     isNormalUser = true;
     description = "spacecat";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" ];
     packages = with pkgs; [
     #  thunderbird
     ];
   };
+  home-manager.users.spacecat = {
+    home.stateVersion = "23.11";
 
+    dconf.settings = {
+      "org/gnome/desktop/wm/keybindings" = {
+        "activate-window-menu" = [ "Menu" ];
+        "begin-move" = [];
+        "begin-resize" = [];
+        "cycle-group" = [];
+        "cycle-group-backward" = [];
+        "cycle-panels" = [];
+        "cycle-panels-backward" = [];
+        "cycle-windows" = [];
+        "cycle-windows-backward" = [];
+        "maximize" = [];
+        "minimize" = [ "<Super>h" ];
+        "move-to-monitor-down" = [];
+        "move-to-monitor-up" = [];
+        "move-to-workspace-1" = [];
+        "move-to-workspace-last" = [];
+        "move-to-workspace-left" = [ "<Alt><Super>Left" ];
+        "move-to-workspace-right" = [ "<Alt><Super>Right" ];
+        "panel-run-dialog" = [];
+        "switch-applications" = [];
+        "switch-applications-backward" = [];
+        "switch-group" = [];
+        "switch-group-backward" = [];
+        "switch-input-source" = [];
+        "switch-input-source-backward" = [];
+        "switch-panels" = [];
+        "switch-panels-backward" = [];
+        "switch-to-workspace-1" = [];
+        "switch-to-workspace-last" = [];
+        "switch-to-workspace-left" = [ "<Control><Super>Left" ];
+        "switch-to-workspace-right" = [ "<Control><Super>Right" ];
+        "switch-windows" = [ "<Alt>Tab" ];
+        "switch-windows-backward" = [ "<Shift><Alt>Tab" ];
+        "toggle-fullscreen" = [ "F11" ];
+        "toggle-maximized" = [];
+        "unmaximize" = [];
+      };
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+        "binding" = "<Shift><Control>Escape";
+        "command" = "/usr/bin/gnome-system-monitor &";
+        "name" = "Taskmanager";
+      };
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
+        "binding" = "<Super>e";
+        "command" = "nautilus -w other-locations:///";
+        "name" = "Explorer";
+      };
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
+        "binding" = "<Control><Alt>t";
+        "command" = "gnome-terminal &";
+        "name" = "Terminal";
+      };
+      "org/gnome/shell" = {
+        disable-user-extensions = false;
+        # so that the installed extensions are acutally enabled, grab the values from dconf-editor
+        enabled-extensions = [
+          "emoji-copy@felipeftn"
+          "app-hider@lynith.dev"
+          "appindicatorsupport@rgcjonas.gmail.com"
+          "clipboard-history@alexsaveau.dev"
+          "ding@rastersoft.com"
+          "gsconnect@andyholmes.github.io"
+          "just-perfection-desktop@just-perfection"
+          "KeepAwake@jepfa.de"
+          "launch-new-instance@gnome-shell-extensions.gcampax.github.com"
+          "quick-settings-audio-panel@rayzeq.github.io"
+          "tailscale@joaophi.github.com"
+          "tiling-assistant@leleat-on-github"
+          ];
+        disabled-extensions = [];
+      };
+      "org/gnome/shell/extensions/clipboard-history" = {
+        "toggle-menu" = [ "<Super>v" ];
+        "window-width-percentage" = 20;
+        "confirm-clear" = false;
+      };
+      "org/gnome/shell/extensions/emoji-copy" = {
+        "recently-used" = ["❤️"];
+      };
+      "org/gnome/shell/extensions/KeepAwake@jepfa.de" = {
+        "no-color-background" = true;
+        "enable-notifications" = false;
+      };
+      "org/gnome/shell/extensions/just-perfection" = {
+        "accessibility-menu" = false;
+        "keyboard-layout" = false;
+        "panel-button-padding-size" = 8;
+        "panel-icon-size" = 16;
+        "panel-indicator-padding-size" = 11;
+        "panel-size" = 33;
+        "startup-status" = 0;
+      };
+    };
+  };
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "spacecat";
@@ -100,7 +194,6 @@
   systemd.services."getty@tty1".enable = false;
   systemd.services."autovt@tty1".enable = false;
 
-    # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   services.xserver.excludePackages = with pkgs; [ xterm ];
   documentation.nixos.enable = false;
@@ -112,43 +205,95 @@
     gnome.yelp
     gnome.gnome-font-viewer
     gnome.gnome-characters
+    gnome.gnome-shell-extensions
+
     baobab
     epiphany
     simple-scan
     yelp
     evince
     ]);
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+
   environment.systemPackages = with pkgs; [
     # main
+    home-manager
     python3
     usbutils
     fzf
+    wget
+    google-chrome
+    pinentry-gnome3
+    gnupg
+    unzip
+    pstree
+    gitFull
+    atuin
     
     # python libs
     updog
-    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    #  wget
+
+    # gnome
+    gnome.dconf-editor
+    gnome.gnome-tweaks
+
+    # gnome extensions
+    gnomeExtensions.app-hider
+    gnomeExtensions.appindicator
+    gnomeExtensions.clipboard-history
+    gnomeExtensions.desktop-icons-ng-ding
+    gnomeExtensions.emoji-copy
+    gnomeExtensions.gsconnect
+    gnomeExtensions.just-perfection
+    gnomeExtensions.keep-awake
+    gnomeExtensions.launch-new-instance
+    gnomeExtensions.quick-settings-audio-panel
+    gnomeExtensions.tailscale-qs
+    gnomeExtensions.tiling-assistant
+    gnomeExtensions.user-themes
     ];
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
+
+  programs.adb.enable = true; 
+  programs.git = {
+    enable = true;
+    package = pkgs.gitFull;
+    config = {
+      init = {
+        defaultBranch = "main";
+        userName = "cs-spacecat";
+        userEmail = "theonoll@gmx.de";
+      };
+    };
+  };
+  services.pcscd.enable = true;  # required for pinentry
+  programs.gnupg.agent = {
+    enable = true;
+    # pinentryFlavor = "gnome3";
+    pinentryPackage = pkgs.pinentry-gnome3;
+    settings = {
+      max-cache-ttl = 0;
+      default-cache-ttl = 0;
+    };
   #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
+  };
+  systemd.services.atuin = {
+    enable = true;
+  };
+  #  environment = {
+  #    HOME = "/home/spacecat";
+  #    ATUIN_LOG = "info";
+  #  };
+  #  serviceConfig = {
+  #    ExecStart = "${pkgs.atuin}/bin/atuin daemon";
+  #  };
+  #  after = [ "network.target" ];
+  #  wantedBy = [ "default.target"  ];
+  #};
+  programs.bash = {
+    interactiveShellInit = ''
+      eval "$(atuin init bash)"
+    '';
+  };
   # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
