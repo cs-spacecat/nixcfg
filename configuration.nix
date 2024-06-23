@@ -14,6 +14,9 @@
   # enable auto updates
   system.autoUpgrade.enable = true;
 
+  # Prevent the new user dialog in zsh
+  system.userActivationScripts.zshrc = "touch .zshrc";
+
   # Bootloader.
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/vda";
@@ -79,17 +82,24 @@
   # experimental features
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  #users.defaultUserShell = pkgs.zsh;
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.spacecat = {
     isNormalUser = true;
     description = "spacecat";
     extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" ];
+    shell = pkgs.zsh;
     packages = with pkgs; [
     #  thunderbird
     ];
   };
   home-manager.users.spacecat = {
     home.stateVersion = "23.11";
+    programs.git = {
+      enable = true;
+      userEmail = "theonoll@gmx.de";
+      userName = "cs-spacecat";
+    };
 
     dconf.settings = {
       "org/gnome/desktop/wm/keybindings" = {
@@ -226,7 +236,7 @@
     gnupg
     unzip
     pstree
-    gitFull
+    #gitFull
     atuin
     
     # python libs
@@ -253,17 +263,17 @@
     ];
 
   programs.adb.enable = true; 
-  programs.git = {
-    enable = true;
-    package = pkgs.gitFull;
-    config = {
-      init = {
-        defaultBranch = "main";
-        userName = "cs-spacecat";
-        userEmail = "theonoll@gmx.de";
-      };
-    };
-  };
+  #programs.git = {
+  #  enable = true;
+  #  package = pkgs.gitFull;
+  #  config = {
+  #    init = {
+  #      defaultBranch = "main";
+  #      userName = "cs-spacecat";
+  #      userEmail = "theonoll@gmx.de";
+  #    };
+  #  };
+  #};
   services.pcscd.enable = true;  # required for pinentry
   programs.gnupg.agent = {
     enable = true;
@@ -278,18 +288,33 @@
   systemd.services.atuin = {
     enable = true;
   };
-  #  environment = {
-  #    HOME = "/home/spacecat";
-  #    ATUIN_LOG = "info";
-  #  };
-  #  serviceConfig = {
-  #    ExecStart = "${pkgs.atuin}/bin/atuin daemon";
-  #  };
-  #  after = [ "network.target" ];
-  #  wantedBy = [ "default.target"  ];
-  #};
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
+    enableBashCompletion = true;
+    shellAliases = {
+      rebuild = "sudo nixos-rebuild switch";
+      clean = "nix-store --gc";
+    };
+    #interactiveShellInit = ''
+    #  eval "$(atuin init zsh)"
+    #'';
+    ohMyZsh = {
+      enable = true;
+      theme = "gnzh";
+      plugins = [
+        "git"
+        #"history"
+      ];
+    };
+    promptInit = ''
+        eval "$(atuin init zsh)"
+      '';
+  };
   programs.bash = {
-    interactiveShellInit = ''
+    shellInit = ''
       eval "$(atuin init bash)"
     '';
   };
