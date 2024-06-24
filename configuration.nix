@@ -179,7 +179,7 @@
         "confirm-clear" = false;
       };
       "org/gnome/shell/extensions/emoji-copy" = {
-        "recently-used" = ["❤️"];
+        "recently-used" = [ "❤", "🫂", "😂", "💀", "😔", "🥹", "😮", "😘" ];
       };
       "org/gnome/shell/extensions/KeepAwake@jepfa.de" = {
         "no-color-background" = true;
