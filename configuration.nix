@@ -23,7 +23,6 @@
   boot.loader.grub.useOSProber = true;
 
   networking.hostName = "Kommandozentrale";
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -31,12 +30,9 @@
   networking.firewall.allowedTCPPorts = [];
   networking.firewall.allowedUDPPorts = [];
 
-  # Set your time zone.
+  # time zone & locale settings
   time.timeZone = "Europe/Berlin";
-
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "de_DE.UTF-8";
     LC_IDENTIFICATION = "de_DE.UTF-8";
@@ -75,23 +71,15 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
   # experimental features
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  #users.defaultUserShell = pkgs.zsh;
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.spacecat = {
     isNormalUser = true;
     description = "spacecat";
     extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" ];
     shell = pkgs.zsh;
-    packages = with pkgs; [
-    #  thunderbird
-    ];
+    packages = with pkgs; [ ];
   };
   #services.xserver.desktopManager.gnome3 = {
   #  extraGsettingsOverridePackages = pkgs.gnome3.gnome-settings-daemon
@@ -131,43 +119,44 @@
     };
     
     dconf.settings = {
-      "org/gnome/desktop/wm/keybindings" = {
-        "activate-window-menu" = [ "Menu" ];
-        "begin-move" = [];
-        "begin-resize" = [];
-        "cycle-group" = [];
-        "cycle-group-backward" = [];
-        "cycle-panels" = [];
-        "cycle-panels-backward" = [];
-        "cycle-windows" = [];
-        "cycle-windows-backward" = [];
-        "maximize" = [];
-        "minimize" = [ "<Super>h" ];
-        "move-to-monitor-down" = [];
-        "move-to-monitor-up" = [];
-        "move-to-workspace-1" = [];
-        "move-to-workspace-last" = [];
-        "move-to-workspace-left" = [ "<Alt><Super>Left" ];
-        "move-to-workspace-right" = [ "<Alt><Super>Right" ];
-        "panel-run-dialog" = [];
-        "switch-applications" = [];
-        "switch-applications-backward" = [];
-        "switch-group" = [];
-        "switch-group-backward" = [];
-        "switch-input-source" = [];
-        "switch-input-source-backward" = [];
-        "switch-panels" = [];
-        "switch-panels-backward" = [];
-        "switch-to-workspace-1" = [];
-        "switch-to-workspace-last" = [];
-        "switch-to-workspace-left" = [ "<Control><Super>Left" ];
-        "switch-to-workspace-right" = [ "<Control><Super>Right" ];
-        "switch-windows" = [ "<Alt>Tab" ];
-        "switch-windows-backward" = [ "<Shift><Alt>Tab" ];
-        "toggle-fullscreen" = [ "F11" ];
-        "toggle-maximized" = [];
-        "unmaximize" = [];
-      };
+      # "org/gnome/desktop/wm/keybindings" = {
+      #   "activate-window-menu" = [ "Menu" ];
+      #   "begin-move" = [];
+      #   "begin-resize" = [];
+      #   "cycle-group" = [];
+      #   "cycle-group-backward" = [];
+      #   "cycle-panels" = [];
+      #   "cycle-panels-backward" = [];
+      #   "cycle-windows" = [];
+      #   "cycle-windows-backward" = [];
+      #   "maximize" = [];
+      #   "minimize" = [ "<Super>h" ];
+      #   "move-to-monitor-down" = [];
+      #   "move-to-monitor-up" = [];
+      #   "move-to-workspace-1" = [];
+      #   "move-to-workspace-last" = [];
+      #   "move-to-workspace-left" = [ "<Alt><Super>Left" ];
+      #   "move-to-workspace-right" = [ "<Alt><Super>Right" ];
+      #   "panel-run-dialog" = [];
+      #   "switch-applications" = [];
+      #   "switch-applications-backward" = [];
+      #   "switch-group" = [];
+      #   "switch-group-backward" = [];
+      #   "switch-input-source" = [];
+      #   "switch-input-source-backward" = [];
+      #   "switch-panels" = [];
+      #   "switch-panels-backward" = [];
+      #   "switch-to-workspace-1" = [];
+      #   "switch-to-workspace-last" = [];
+      #   "switch-to-workspace-left" = [ "<Control><Super>Left" ];
+      #   "switch-to-workspace-right" = [ "<Control><Super>Right" ];
+      #   "switch-windows" = [ "<Alt>Tab" ];
+      #   "switch-windows-backward" = [ "<Shift><Alt>Tab" ];
+      #   "toggle-fullscreen" = [ "F11" ];
+      #   "toggle-maximized" = [];
+      #   "unmaximize" = [];
+      # };
+
       #"org/gnome/settings-daemon/plugins/media-keys" = {
       #  custom-keybindings = [
       #    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0"
@@ -209,27 +198,27 @@
           ];
         disabled-extensions = [];
       };
-      "org/gnome/shell/extensions/clipboard-history" = {
-        "toggle-menu" = [ "<Super>v" ];
-        "window-width-percentage" = 20;
-        "confirm-clear" = false;
-      };
-      "org/gnome/shell/extensions/emoji-copy" = {
-        "recently-used" = [ "❤" "🫂" "😂" "💀" "😔" "🥹" "😮" "😘" ];
-      };
-      "org/gnome/shell/extensions/KeepAwake@jepfa.de" = {
-        "no-color-background" = true;
-        "enable-notifications" = false;
-      };
-      "org/gnome/shell/extensions/just-perfection" = {
-        "accessibility-menu" = false;
-        "keyboard-layout" = false;
-        "panel-button-padding-size" = 8;
-        "panel-icon-size" = 16;
-        "panel-indicator-padding-size" = 11;
-        "panel-size" = 33;
-        "startup-status" = 0;
-      };
+      # "org/gnome/shell/extensions/clipboard-history" = {
+      #   "toggle-menu" = [ "<Super>v" ];
+      #   "window-width-percentage" = 20;
+      #   "confirm-clear" = false;
+      # };
+      # "org/gnome/shell/extensions/emoji-copy" = {
+      #   "recently-used" = [ "❤" "🫂" "😂" "💀" "😔" "🥹" "😮" "😘" ];
+      # };
+      # "org/gnome/shell/extensions/KeepAwake@jepfa.de" = {
+      #   "no-color-background" = true;
+      #   "enable-notifications" = false;
+      # };
+      # "org/gnome/shell/extensions/just-perfection" = {
+      #   "accessibility-menu" = false;
+      #   "keyboard-layout" = false;
+      #   "panel-button-padding-size" = 8;
+      #   "panel-icon-size" = 16;
+      #   "panel-indicator-padding-size" = 11;
+      #   "panel-size" = 33;
+      #   "startup-status" = 0;
+      # };
     };
   };
   # Enable automatic login for the user.
@@ -299,17 +288,6 @@
     ];
 
   programs.adb.enable = true; 
-  #programs.git = {
-  #  enable = true;
-  #  package = pkgs.gitFull;
-  #  config = {
-  #    init = {
-  #      defaultBranch = "main";
-  #      userName = "cs-spacecat";
-  #      userEmail = "theonoll@gmx.de";
-  #    };
-  #  };
-  #};
   services.pcscd.enable = true;  # required for pinentry
   programs.gnupg.agent = {
     enable = true;
@@ -319,7 +297,6 @@
       max-cache-ttl = 0;
       default-cache-ttl = 0;
     };
-  #   enableSSHSupport = true;
   };
   systemd.services.atuin = {
     enable = true;
@@ -334,9 +311,6 @@
       rebuild = "sudo nixos-rebuild switch";
       clean = "nix-store --gc";
     };
-    #interactiveShellInit = ''
-    #  eval "$(atuin init zsh)"
-    #'';
     ohMyZsh = {
       enable = true;
       theme = "gnzh";
@@ -349,26 +323,250 @@
         eval "$(atuin init zsh)"
       '';
   };
-  programs.bash = {
-    shellInit = ''
-      eval "$(atuin init bash)"
-    '';
-  };
   services.xserver.desktopManager.gnome = {
     extraGSettingsOverridePackages = with pkgs; [ gnome3.gnome-settings-daemon ];
     extraGSettingsOverrides = ''
-      [org.gnome.settings-daemon.plugins.media-keys]
-      custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+      [org/gnome/Weather]
+      locations=[<(uint32 2, <('Berlin', 'EDDT', true, [(0.91746141594945008, 0.23241968454167572)], [(0.91658875132345297, 0.23387411976724018)])>)>]
 
+      [org/gnome/desktop/app-folders/folders/ed4a187a-3b9c-4d65-ab6d-38aa3781e102]
+      apps=['org.gnome.Weather.desktop', 'org.gnome.Maps.desktop', 'org.gnome.Calculator.desktop', 'md.obsidian.Obsidian.desktop', 'org.gnome.clocks.desktop', 'org.gnome.Contacts.desktop', 'io.github.Soundux.desktop', 'org.gnome.SystemMonitor.desktop', 'org.gnome.Software.desktop']
+      name='Accessories'
 
-      [org.gnome.settings-daemon.plugins.media-keys.custom-keybindings.custom0]
-      binding='<Super>t'
-      command='gnome-terminal'
-      name='Open terminal'
+      [org/gnome/desktop/calendar]
+      show-weekdate=false
+
+      [org/gnome/desktop/peripherals/keyboard]
+      numlock-state=true
+
+      [org/gnome/desktop/peripherals/mouse]
+      accel-profile='flat'
+      natural-scroll=false
+      speed=-0.12396694214876036
+
+      [org/gnome/desktop/peripherals/touchpad]
+      two-finger-scrolling-enabled=true
+
+      [org/gnome/desktop/wm/keybindings]
+      activate-window-menu=['Menu']
+      begin-move=@as []
+      begin-resize=@as []
+      cycle-group=@as []
+      cycle-group-backward=@as []
+      cycle-panels=@as []
+      cycle-panels-backward=@as []
+      cycle-windows=@as []
+      cycle-windows-backward=@as []
+      maximize=@as []
+      minimize=['<Super>h']
+      move-to-monitor-down=@as []
+      move-to-monitor-up=@as []
+      move-to-workspace-1=@as []
+      move-to-workspace-last=@as []
+      move-to-workspace-left=['<Alt><Super>Left']
+      move-to-workspace-right=['<Alt><Super>Right']
+      panel-run-dialog=['<Super>space']
+      switch-applications=@as []
+      switch-applications-backward=@as []
+      switch-group=@as []
+      switch-group-backward=@as []
+      switch-input-source=@as []
+      switch-input-source-backward=@as []
+      switch-panels=@as []
+      switch-panels-backward=@as []
+      switch-to-workspace-1=@as []
+      switch-to-workspace-last=@as []
+      switch-to-workspace-left=['<Control><Super>Left']
+      switch-to-workspace-right=['<Control><Super>Right']
+      switch-windows=['<Alt>Tab']
+      switch-windows-backward=['<Shift><Alt>Tab']
+      toggle-fullscreen=['F11']
+      toggle-maximized=@as []
+      unmaximize=@as []
+
+      [org/gnome/login-screen]
+      enable-fingerprint-authentication=true
+      enable-password-authentication=true
+      enable-smartcard-authentication=false
+
+      [org/gnome/mutter]
+      check-alive-timeout=uint32 10000
+      edge-tiling=false
+      workspaces-only-on-primary=false
+
+      [org/gnome/settings-daemon/plugins/media-keys]
+      custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/']
+      help=@as []
+      logout=@as []
+      magnifier=@as []
+      magnifier-zoom-in=@as []
+      magnifier-zoom-out=@as []
+      screenreader=@as []
+
+      [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+      binding='<Shift><Control>Escape'
+      command='/usr/bin/gnome-system-monitor &'
+      name='Taskmanager'
+
+      [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1]
+      binding='<Super>e'
+      command='nautilus -w other-locations:///'
+      name='Explorer'
+
+      [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
+      binding='<Control><Alt>t'
+      command='gnome-terminal &'
+      name='Terminal'
+
+      [org/gnome/shell/extensions/KeepAwake@jepfa.de]
+      enable-notifications=false
+      idle-activation-enabled=false
+      idle-delay=0
+      idle-dim=false
+      no-color-background=true
+      restore-state=false
+      sleep-inactive-ac-type='nothing'
+      sleep-inactive-battery-type='nothing'
+      use-bold-icons=true
+
+      [org/gnome/shell/extensions/appindicator]
+      custom-icons=@a(sss) []
+      icon-opacity=240
+      icon-size=18
+      tray-pos='right'
+
+      [org/gnome/shell/extensions/clipboard-history]
+      confirm-clear=false
+      display-mode=0
+      enable-keybindings=true
+      toggle-menu=['<Super>v']
+      topbar-preview-size=1
+      window-width-percentage=20
+
+      [org/gnome/shell/extensions/emoji-copy]
+      recently-used=['😂', '❤️', '😍', '😭', '😊', '😒', '😘', '😩', '🤔', '☺️', '👌']
+
+      [org/gnome/shell/extensions/just-perfection]
+      accessibility-menu=true
+      activities-button=true
+      alt-tab-icon-size=0
+      alt-tab-small-icon-size=0
+      alt-tab-window-preview-size=0
+      animation=1
+      background-menu=true
+      clock-menu=true
+      clock-menu-position=0
+      clock-menu-position-offset=0
+      controls-manager-spacing-size=0
+      dash=true
+      dash-app-running=true
+      dash-icon-size=0
+      dash-separator=true
+      double-super-to-appgrid=true
+      keyboard-layout=true
+      osd=true
+      overlay-key=true
+      panel=true
+      panel-button-padding-size=0
+      panel-icon-size=0
+      panel-in-overview=true
+      panel-indicator-padding-size=0
+      panel-notification-icon=true
+      panel-size=0
+      power-icon=true
+      quick-settings=true
+      ripple-box=true
+      search=true
+      show-apps-button=true
+      startup-status=1
+      switcher-popup-delay=true
+      theme=false
+      top-panel-position=0
+      window-demands-attention-focus=false
+      window-menu-take-screenshot-button=true
+      window-picker-icon=true
+      window-preview-caption=true
+      window-preview-close-button=true
+      workspace=true
+      workspace-background-corner-size=0
+      workspace-peek=true
+      workspace-popup=true
+      workspace-switcher-should-show=false
+      workspace-switcher-size=0
+      workspace-wrap-around=false
+      workspaces-in-app-grid=true
+      world-clock=true
+
+      [org/gnome/shell/extensions/tiling-assistant]
+      activate-layout0=@as []
+      activate-layout1=@as []
+      activate-layout2=@as []
+      activate-layout3=@as []
+      active-window-hint=1
+      active-window-hint-color='rgb(53,132,228)'
+      auto-tile=@as []
+      center-window=@as []
+      debugging-free-rects=@as []
+      debugging-show-tiled-rects=@as []
+      default-move-mode=0
+      dynamic-keybinding-behavior=0
+      import-layout-examples=false
+      last-version-installed=47
+      overridden-settings={'org.gnome.mutter.edge-tiling': <@mb nothing>, 'org.gnome.desktop.wm.keybindings.maximize': <@mb nothing>, 'org.gnome.desktop.wm.keybindings.unmaximize': <['<Super>Down']>}
+      restore-window=['<Super>Down']
+      search-popup-layout=@as []
+      tile-bottom-half=['<Shift><Super>KP_Down']
+      tile-bottom-half-ignore-ta=@as []
+      tile-bottomleft-quarter=['<Shift><Super>KP_End']
+      tile-bottomleft-quarter-ignore-ta=@as []
+      tile-bottomright-quarter=['<Shift><Super>KP_Next']
+      tile-bottomright-quarter-ignore-ta=@as []
+      tile-edit-mode=@as []
+      tile-left-half=['<Shift><Super>KP_Left']
+      tile-left-half-ignore-ta=@as []
+      tile-maximize=['<Super>Up', '<Super>KP_5']
+      tile-maximize-horizontally=@as []
+      tile-maximize-vertically=@as []
+      tile-right-half=['<Shift><Super>KP_Right']
+      tile-right-half-ignore-ta=@as []
+      tile-top-half=['<Shift><Super>KP_Up']
+      tile-top-half-ignore-ta=@as []
+      tile-topleft-quarter=['<Shift><Super>KP_Home']
+      tile-topleft-quarter-ignore-ta=@as []
+      tile-topright-quarter=['<Shift><Super>KP_Page_Up']
+      tile-topright-quarter-ignore-ta=@as []
+      toggle-always-on-top=@as []
+      toggle-tiling-popup=@as []
+
+      [org/gnome/shell/extensions/trayIconsReloaded]
+      icon-brightness=40
+      icon-contrast=30
+      icon-saturation=50
+      icon-size=19
+      icons-limit=4
+      tray-margin-left=2
+
+      [org/gnome/shell/extensions/weatherornot]
+      position='right'
+
+      [org/gnome/shell/extensions/window-list]
+      display-all-workspaces=false
+      grouping-mode='never'
+      show-on-all-monitors=false
+
+      [org/gnome/shell/keybindings]
+      focus-active-notification=@as []
+      open-application-menu=@as []
+      screenshot=@as []
+      screenshot-window=@as []
+      show-screen-recording-ui=@as []
+      toggle-message-tray=@as []
+
+      [org/gnome/shell/weather]
+      automatic-location=true
+      locations=[<(uint32 2, <('Berlin', 'EDDT', true, [(0.91746141594945008, 0.23241968454167572)], [(0.91658875132345297, 0.23387411976724018)])>)>]
     '';
   };
-  # services.openssh.enable = true;
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
