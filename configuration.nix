@@ -93,6 +93,35 @@
     #  thunderbird
     ];
   };
+  #services.xserver.desktopManager.gnome3 = {
+  #  extraGsettingsOverridePackages = pkgs.gnome3.gnome-settings-daemon
+
+  #  extraGSettingsOverrides = ''
+  #    [org/gnome/settings-daemon/plugins/media-keys]
+  #    custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/']
+  #    help=@as []
+  #    logout=@as []
+  #    magnifier=@as []
+  #    magnifier-zoom-in=@as []
+  #    magnifier-zoom-out=@as []
+  #    screenreader=@as []
+      
+  #    [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+  #    binding='<Shift><Control>Escape'
+  #    command='/usr/bin/gnome-system-monitor &'
+  #    name='Taskmanager'
+   
+  #    [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1]
+  #    binding='<Super>e'
+  #    command='nautilus -w other-locations:///'
+  #    name='Explorer'
+      
+  #    [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2]
+  #    binding='<Control><Alt>t'
+  #    command='gnome-terminal &'
+  #    name='Terminal'
+  #  '';
+  #};
   home-manager.users.spacecat = {
     home.stateVersion = "23.11";
     programs.git = {
@@ -100,7 +129,7 @@
       userEmail = "theonoll@gmx.de";
       userName = "cs-spacecat";
     };
-
+    
     dconf.settings = {
       "org/gnome/desktop/wm/keybindings" = {
         "activate-window-menu" = [ "Menu" ];
@@ -139,21 +168,28 @@
         "toggle-maximized" = [];
         "unmaximize" = [];
       };
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
-        "binding" = "<Shift><Control>Escape";
-        "command" = "/usr/bin/gnome-system-monitor &";
-        "name" = "Taskmanager";
-      };
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
-        "binding" = "<Super>e";
-        "command" = "nautilus -w other-locations:///";
-        "name" = "Explorer";
-      };
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
-        "binding" = "<Control><Alt>t";
-        "command" = "gnome-terminal &";
-        "name" = "Terminal";
-      };
+      #"org/gnome/settings-daemon/plugins/media-keys" = {
+      #  custom-keybindings = [
+      #    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0"
+      #    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1"
+      #    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2"
+      #  ];
+      #};
+      #"org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+      #  "binding" = "<Shift><Control>Escape";
+      #  "command" = "/usr/bin/gnome-system-monitor &";
+      #  "name" = "Taskmanager";
+      #};
+      #"org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
+      #  "binding" = "<Super>e";
+      #  "command" = "nautilus -w other-locations:///";
+      #  "name" = "Explorer";
+      #};
+      #"org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
+      #  "binding" = "<Control><Alt>t";
+      #  "command" = "gnome-terminal &";
+      #  "name" = "Terminal";
+      #};
       "org/gnome/shell" = {
         disable-user-extensions = false;
         # so that the installed extensions are acutally enabled, grab the values from dconf-editor
@@ -179,7 +215,7 @@
         "confirm-clear" = false;
       };
       "org/gnome/shell/extensions/emoji-copy" = {
-        "recently-used" = [ "❤", "🫂", "😂", "💀", "😔", "🥹", "😮", "😘" ];
+        "recently-used" = [ "❤" "🫂" "😂" "💀" "😔" "🥹" "😮" "😘" ];
       };
       "org/gnome/shell/extensions/KeepAwake@jepfa.de" = {
         "no-color-background" = true;
