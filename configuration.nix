@@ -354,6 +354,19 @@
       eval "$(atuin init bash)"
     '';
   };
+  services.xserver.desktopManager.gnome = {
+    extraGSettingsOverridePackages = with pkgs; [ gnome3.gnome-settings-daemon ];
+    extraGSettingsOverrides = ''
+      [org.gnome.settings-daemon.plugins.media-keys]
+      custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+
+
+      [org.gnome.settings-daemon.plugins.media-keys.custom-keybindings.custom0]
+      binding='<Super>t'
+      command='gnome-terminal'
+      name='Open terminal'
+    '';
+  };
   # services.openssh.enable = true;
 
   # This value determines the NixOS release from which the default
