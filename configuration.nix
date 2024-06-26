@@ -554,6 +554,10 @@
       grouping-mode='never'
       show-on-all-monitors=false
 
+      [org/gnome/shell/extensions/user-theme]
+      name=''
+
+
       [org/gnome/shell/keybindings]
       focus-active-notification=@as []
       open-application-menu=@as []
