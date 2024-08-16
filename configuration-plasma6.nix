@@ -101,7 +101,6 @@
     adb.enable = true;
     gnupg.agent.enable = true;
     zsh.enable = true;
-    zsh.ohMyZsh.enable = true;
 
     gnupg.agent = {
       pinentryPackage = pkgs.pinentry-qt;
@@ -122,13 +121,16 @@
         configure = "kate /etc/nixos/configuration.nix";
       };
       ohMyZsh = {
+        enable = true;
         theme = "gnzh";
         plugins = [
           "git"
           #"history"
         ];
       };
-      promptInit = 'eval "$(atuin init zsh)"';
+    promptInit = ''
+        eval "$(atuin init zsh)"
+      '';
     };
   };
 
