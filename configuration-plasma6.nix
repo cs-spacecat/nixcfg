@@ -17,14 +17,12 @@
   # ---- end test place ---------
 
 
-  # Prevent the new user dialog in zsh
-  system.userActivationScripts.zshrc = "touch .zshrc";
+  system.userActivationScripts.zshrc = "touch .zshrc";   # Prevent the new user dialog in zsh
   fileSystems."/run/media/spacecat/4tb-hdd".device = "/dev/disk/by-uuid/1c16e4a2-6027-4f80-b880-b37395562a0a";   # Automount HDD
   security.rtkit.enable = true;
-  systemd.services.atuin.enable = true;
   system.autoUpgrade.enable = true;  # enable auto updates
   nixpkgs.config.allowUnfree = true;
-  documentation.nixos.enable = false;
+  documentation.nixos.enable = false;  # disable NixOS help entry
   nix.settings.experimental-features = [ "nix-command" "flakes" ];  # experimental features
 
 
@@ -38,7 +36,7 @@
   users.users.spacecat = {
     isNormalUser = true;
     description = "spacecat";
-    extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" ];
+    extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" "libvirtd" ];
     shell = pkgs.zsh;
     packages = with pkgs; [ ];
   };
@@ -65,6 +63,9 @@
     LC_TIME = "de_DE.UTF-8";
   };
 
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;  # vm USB passthrough
+  systemd.services.atuin.enable = true;
   services = {
     xserver.enable = true;  # Enable the X11 windowing system.
 
@@ -101,6 +102,9 @@
     adb.enable = true;
     gnupg.agent.enable = true;
     zsh.enable = true;
+    virt-manager.enable = true;
+    streamdeck-ui.enable = true;
+    streamdeck-ui.autoStart = true;
 
     gnupg.agent = {
       pinentryPackage = pkgs.pinentry-qt;
@@ -118,7 +122,7 @@
       shellAliases = {
         rebuild = "sudo nixos-rebuild switch";
         clean = "nix-store --gc";
-        configure = "kate /etc/nixos/configuration.nix";
+        configure = "sudo nano /etc/nixos/configuration.nix && rebuild";
       };
       ohMyZsh = {
         enable = true;
@@ -142,7 +146,6 @@
       userName = "cs-spacecat";
     };
   };
-
   services.xserver.excludePackages = with pkgs; [
     xterm
   ];
@@ -159,9 +162,12 @@
     steam
     heroic
     (opera.override { proprietaryCodecs = true; })  # video steaming support for opera
+    vlc
+    streamdeck-ui
+    keepassxc
 
     # cli
-    usbutils
+    usbutils  # lsusb
     fzf
     wget
     unzip
@@ -169,11 +175,13 @@
     atuin
     vnstat  # network stat tracker
     ffmpeg-full
+    tree
     #mpvpaper
 
     # pgp
     pinentry-qt
     gnupg
+    #kgpg
 
     # ui
     simp1e-cursors
@@ -186,11 +194,17 @@
     # NixOS
     home-manager
 
-    # dictionaries
+    # dictionaries (mainly for kRunner)
     aspellDicts.de
     aspellDicts.en
     aspellDicts.en-science
     aspellDicts.en-computers
-    ];
+
+    # remove l8r
+    #cmake  
+    #gcc    
+    #gnumake
+
+  ];
 }
 
