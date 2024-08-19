@@ -104,7 +104,7 @@
     zsh.enable = true;
     virt-manager.enable = true;
     streamdeck-ui.enable = true;
-    streamdeck-ui.autoStart = true;
+    #streamdeck-ui.autoStart = true;
 
     gnupg.agent = {
       pinentryPackage = pkgs.pinentry-qt;
@@ -158,12 +158,12 @@
   ];
   environment.systemPackages = with pkgs; [
     google-chrome
+    streamdeck-ui
     discord
     steam
     heroic
     (opera.override { proprietaryCodecs = true; })  # video steaming support for opera
     vlc
-    streamdeck-ui
     keepassxc
 
     # cli
@@ -176,6 +176,9 @@
     vnstat  # network stat tracker
     ffmpeg-full
     tree
+    btop
+    cmatrix
+    cowsay
     #mpvpaper
 
     # pgp
@@ -204,7 +207,6 @@
     #cmake  
     #gcc    
     #gnumake
-
   ];
 }
 
