@@ -5,6 +5,7 @@
   imports = [
       ./hardware-configuration.nix
       (import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz"}/nixos")
+      #(import "${builtins.fetchTarball "https://github.com/chaotic-cx/nyx/archive/1c04615460aa982ac54a4c68c55eb15e9f842e31.tar.gz"}/pkgs/mesa-git")
     ];
 
 
@@ -12,8 +13,30 @@
 
   # doesent work sadly
   #system.userActivationScripts.script.text = "mpvpaper '*' wp8214759.mp4 -p -o 'no-audio --loop-playlist'";
+  hardware.cpu.amd.updateMicrocode = true;
 
-
+  boot.initrd.kernelModules = ["amdgpu"];
+  hardware.amdgpu.opencl.enable = true;
+  #hardware.amdgpu.loadInInitrd = true;
+  hardware.amdgpu.initrd.enable = true;
+  #hardware.amdgpu.opencl.enable
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
+  };
+  # Some programs hard-code the path to HIP
+  systemd.tmpfiles.rules = ["L+ /opt/rocm/hip - - - - ${pkgs.rocmPackages.clr}"];
+  # Enable ROCM on my RX 580
+  environment = {
+    variables = {
+      ROC_ENABLE_PRE_VEGA = "1";
+    };
+    #systemPackages = with pkgs; [
+    #  clinfo
+    #];
+  };
+  #chaotic.mesa-git.enable = true;
   # ---- end test place ---------
 
 
@@ -67,7 +90,12 @@
   virtualisation.spiceUSBRedirection.enable = true;  # vm USB passthrough
   systemd.services.atuin.enable = true;
   services = {
-    xserver.enable = true;  # Enable the X11 windowing system.
+    xserver = {
+      enable = true;  # Enable the X11 windowing system.
+      xkb.layout = "de";  # German Keymap
+      videoDrivers = ["amdgpu"];
+    };
+    #xserver.enable = true;  # Enable the X11 windowing system.
 
     pcscd.enable = true;  # required for pinentry
 
@@ -75,7 +103,7 @@
     displayManager.sddm.enable = true;
     desktopManager.plasma6.enable = true;
 
-    xserver.xkb.layout = "de";  # German Keymap
+    #xserver.xkb.layout = "de";  # German Keymap
 
     pipewire = {
       enable = true;
@@ -120,9 +148,12 @@
       syntaxHighlighting.enable = true;
       enableBashCompletion = true;
       shellAliases = {
-        rebuild = "sudo nixos-rebuild switch";
-        clean = "nix-store --gc";
+        rebuild   = "sudo nixos-rebuild switch";
+        clean     = "nix-store --gc";
         configure = "sudo nano /etc/nixos/configuration.nix && rebuild";
+        o         = "xdg-open . &";
+        open      = "xdg-open . &";
+
       };
       ohMyZsh = {
         enable = true;
@@ -165,11 +196,13 @@
     (opera.override { proprietaryCodecs = true; })  # video steaming support for opera
     vlc
     keepassxc
+    vscode
 
     # cli
     usbutils  # lsusb
     fzf
     wget
+    file
     unzip
     pstree
     atuin
@@ -207,6 +240,7 @@
     #cmake  
     #gcc    
     #gnumake
+    clinfo
   ];
 }
 
