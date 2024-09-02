@@ -4,6 +4,7 @@ let
   user = "";
   password = "";
   hostname = "";
+  cloudflareToken = "";
   lang = "";
 
 in {
@@ -50,10 +51,21 @@ in {
     users."${user}" = {
       isNormalUser = true;
       password = password;
-      extraGroups = [ "wheel" "docker" ];
+      extraGroups = [ "wheel"];  # "docker"
       shell = pkgs.zsh;
     };
     users."root".password = password;
+  };
+
+  systemd.services.cloudflared_tunnel = {  # for publicly hosting local websites
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run --token=${cloudflareToken}";
+      Restart = "always";
+      User = "spacecat";
+      #Group = "cloudflared";
+    };
   };
 
   system.userActivationScripts.zshrc = "touch .zshrc";   # Prevent the new user dialog in zsh
