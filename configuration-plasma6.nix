@@ -1,11 +1,16 @@
 { config, pkgs, ... }:
 
-{
-  system.stateVersion = "24.05";
+let
+  user = "";
+  hostname = "";
+  lang = "";
+  gitEmail = "";
+  gitUser = "";
+  nixVer = "24.05";
+in {
   imports = [
       ./hardware-configuration.nix
-      (import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz"}/nixos")
-      #(import "${builtins.fetchTarball "https://github.com/chaotic-cx/nyx/archive/1c04615460aa982ac54a4c68c55eb15e9f842e31.tar.gz"}/pkgs/mesa-git")
+      (import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-${nixVer}.tar.gz"}/nixos")
     ];
 
 
@@ -13,40 +18,19 @@
 
   # doesent work sadly
   #system.userActivationScripts.script.text = "mpvpaper '*' wp8214759.mp4 -p -o 'no-audio --loop-playlist'";
-  hardware.cpu.amd.updateMicrocode = true;
 
-  boot.initrd.kernelModules = ["amdgpu"];
-  hardware.amdgpu.opencl.enable = true;
-  #hardware.amdgpu.loadInInitrd = true;
-  hardware.amdgpu.initrd.enable = true;
-  #hardware.amdgpu.opencl.enable
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
-  };
-  # Some programs hard-code the path to HIP
-  systemd.tmpfiles.rules = ["L+ /opt/rocm/hip - - - - ${pkgs.rocmPackages.clr}"];
-  # Enable ROCM on my RX 580
-  environment = {
-    variables = {
-      ROC_ENABLE_PRE_VEGA = "1";
-    };
-    #systemPackages = with pkgs; [
-    #  clinfo
-    #];
-  };
-  #chaotic.mesa-git.enable = true;
   # ---- end test place ---------
 
-
+  system.stateVersion = nixVer;
+  system.autoUpgrade.enable = true;  # enable auto updates
   system.userActivationScripts.zshrc = "touch .zshrc";   # Prevent the new user dialog in zsh
   fileSystems."/run/media/spacecat/4tb-hdd".device = "/dev/disk/by-uuid/1c16e4a2-6027-4f80-b880-b37395562a0a";   # Automount HDD
   security.rtkit.enable = true;
-  system.autoUpgrade.enable = true;  # enable auto updates
   nixpkgs.config.allowUnfree = true;
   documentation.nixos.enable = false;  # disable NixOS help entry
   nix.settings.experimental-features = [ "nix-command" "flakes" ];  # experimental features
+  console.keyMap = "de";   # Configure console keymap
+
 
 
   # Bootloader.
@@ -65,7 +49,7 @@
   };
 
   networking = {
-    hostName = "Kommandozentrale";
+    hostName = hostname;
     networkmanager.enable = true;  # Enable networking
     firewall.allowedTCPPorts = [];
     firewall.allowedUDPPorts = [];
@@ -73,17 +57,17 @@
 
   # time zone & locale settings
   time.timeZone = "Europe/Berlin";
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = lang;
   i18n.extraLocaleSettings = {
-    LC_ADDRESS = "de_DE.UTF-8";
-    LC_IDENTIFICATION = "de_DE.UTF-8";
-    LC_MEASUREMENT = "de_DE.UTF-8";
-    LC_MONETARY = "de_DE.UTF-8";
-    LC_NAME = "de_DE.UTF-8";
-    LC_NUMERIC = "de_DE.UTF-8";
-    LC_PAPER = "de_DE.UTF-8";
-    LC_TELEPHONE = "de_DE.UTF-8";
-    LC_TIME = "de_DE.UTF-8";
+    LC_ADDRESS = lang;
+    LC_IDENTIFICATION = lang;
+    LC_MEASUREMENT = lang;
+    LC_MONETARY = lang;
+    LC_NAME = lang;
+    LC_NUMERIC = lang;
+    LC_PAPER = lang;
+    LC_TELEPHONE = lang;
+    LC_TIME = lang;
   };
 
   virtualisation.libvirtd.enable = true;
@@ -113,10 +97,8 @@
     };
   };
 
-  # Configure console keymap
-  console.keyMap = "de";
-
   hardware = {
+    cpu.amd.updateMicrocode = true;
     pulseaudio.enable = false;
     bluetooth.enable = true;
     bluetooth.powerOnBoot = true;
@@ -124,7 +106,7 @@
   };
 
   programs = {
-    steam.remotePlay.openFirewall = true;
+    #steam.remotePlay.openFirewall = true;
 
     steam.enable = true;
     adb.enable = true;
@@ -148,7 +130,7 @@
       syntaxHighlighting.enable = true;
       enableBashCompletion = true;
       shellAliases = {
-        rebuild   = "sudo nixos-rebuild switch";
+        rebuild   = "sudo nixos-rebuild switch --show-trace";
         clean     = "nix-store --gc";
         configure = "sudo nano /etc/nixos/configuration.nix && rebuild";
         o         = "xdg-open . &";
@@ -170,11 +152,11 @@
   };
 
   home-manager.users.spacecat = {
-    home.stateVersion = "24.05";
+    home.stateVersion = nixVer;
     programs.git = {
       enable = true;
-      userEmail = "theonoll@gmx.de";
-      userName = "cs-spacecat";
+      userEmail = gitEmail;
+      userName = gitUser;
     };
   };
   services.xserver.excludePackages = with pkgs; [
@@ -197,6 +179,7 @@
     vlc
     keepassxc
     vscode
+    gparted
 
     # cli
     usbutils  # lsusb
