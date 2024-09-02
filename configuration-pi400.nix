@@ -8,6 +8,7 @@ let
 
 in {
   imports = [
+    ./cups.nix
     "${fetchTarball "https://github.com/NixOS/nixos-hardware/tarball/master"}/raspberry-pi/4"
   ];
 
