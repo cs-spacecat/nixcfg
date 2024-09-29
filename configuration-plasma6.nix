@@ -3,7 +3,7 @@
 let
   user = "";
   hostname = "";
-  lang = "";
+  lang = "de_DE.UTF-8";
   gitEmail = "";
   gitUser = "";
   nixVer = "24.05";
@@ -15,9 +15,19 @@ in {
 
 
   # ------ test place -----------
+  services.udev.packages = [ pkgs.streamdeck-ui ];
 
   # doesent work sadly
   #system.userActivationScripts.script.text = "mpvpaper '*' wp8214759.mp4 -p -o 'no-audio --loop-playlist'";
+
+  #hardware.opengl = { # hardware.graphics on unstable
+  #  enable = true;
+  #  extraPackages = with pkgs; [
+  #    intel-media-driver # LIBVA_DRIVER_NAME=iHD
+  #    intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+  #    libvdpau-va-gl
+  #  ];
+  #};
 
   # ---- end test place ---------
 
@@ -29,6 +39,7 @@ in {
   nixpkgs.config.allowUnfree = true;
   documentation.nixos.enable = false;  # disable NixOS help entry
   nix.settings.experimental-features = [ "nix-command" "flakes" ];  # experimental features
+  nix.settings.auto-optimise-store = true;
   console.keyMap = "de";   # Configure console keymap
 
 
@@ -43,7 +54,7 @@ in {
   users.users.spacecat = {
     isNormalUser = true;
     description = "spacecat";
-    extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" "libvirtd" ];
+    extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" "libvirtd" "video" ];
     shell = pkgs.zsh;
     packages = with pkgs; [ ];
   };
@@ -95,8 +106,24 @@ in {
       alsa.support32Bit = true;
       pulse.enable = true;
     };
-  };
+    # --- davfs (mount webdav as filesystem) ---
+    davfs2.enable = true;
+    #systemd.services.davfs = {
+    #  Description = "Mount WebDAV Service";
+    #  After = [ "network-online.target" ];
+    #  Wants= [ "network-online.target" ];
 
+    #  [Mount]
+    #  What=http(s)://address:<port>/path
+    #  Where=/mnt/webdav/service
+    #  Options=uid=1000,file_mode=0664,dir_mode=2775,grpid
+    #  Type=davfs
+    #  TimeoutSec=15
+
+    #  [Install]
+    #  WantedBy=multi-user.target
+    #};
+  };
   hardware = {
     cpu.amd.updateMicrocode = true;
     pulseaudio.enable = false;
@@ -135,9 +162,32 @@ in {
         configure = "sudo nano /etc/nixos/configuration.nix && rebuild";
         o         = "xdg-open . &";
         open      = "xdg-open . &";
-
+        sl        = "${pkgs.sl}/bin/sl -Gw";
       };
-      ohMyZsh = {
+      shellInit = ''
+        ex () {  # ex - archive extractor
+          if [ -f $1 ] ; then
+            case $1 in
+              *.tar.bz2)   tar xjf $1   ;;
+              *.tar.gz)    tar xzf $1   ;;
+              *.tar.xz)    tar xJf $1   ;;
+              *.bz2)       bunzip2 $1   ;;
+              *.rar)       unrar x $1     ;;
+              *.gz)        gunzip $1    ;;
+              *.tar)       tar xf $1    ;;
+              *.tbz2)      tar xjf $1   ;;
+              *.tgz)       tar xzf $1   ;;
+              *.zip)       unzip $1     ;;
+              *.Z)         uncompress $1;;
+              *.7z)        7z x $1      ;;
+              *)           echo "'$1' cannot be extracted via ex()" ;;
+            esac
+          else
+            echo "'$1' is not a valid file"
+          fi
+        }
+      '';
+        ohMyZsh = {
         enable = true;
         theme = "gnzh";
         plugins = [
@@ -159,6 +209,28 @@ in {
       userName = gitUser;
     };
   };
+  
+  fonts = {  # copied from https://github.com/ChrisTitusTech/nixos-titus/blob/main/system/configuration.nix
+    packages = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk
+      noto-fonts-emoji
+      font-awesome
+      source-han-sans
+      source-han-sans-japanese
+      source-han-serif-japanese
+      (nerdfonts.override {fonts = ["Meslo"];})
+    ];
+    fontconfig = {
+      enable = true;
+      defaultFonts = {
+        monospace = ["Meslo LG M Regular Nerd Font Complete Mono"];
+        serif = ["Noto Serif" "Source Han Serif"];
+        sansSerif = ["Noto Sans" "Source Han Sans"];
+      };
+    };
+  };
+  
   services.xserver.excludePackages = with pkgs; [
     xterm
   ];
@@ -167,7 +239,7 @@ in {
     khelpcenter
     kwrited
     okular
-    print-manager
+    #print-manager
   ];
   environment.systemPackages = with pkgs; [
     google-chrome
@@ -180,6 +252,9 @@ in {
     keepassxc
     vscode
     gparted
+    keepassxc
+    arduino
+    inkscape-with-extensions
 
     # cli
     usbutils  # lsusb
@@ -195,7 +270,11 @@ in {
     btop
     cmatrix
     cowsay
+    sl
+    p7zip  # 7z support
     #mpvpaper
+
+    # kde
 
     # pgp
     pinentry-qt
@@ -208,6 +287,9 @@ in {
 
     # python libs
     python3
+    python311Packages.pyserial
+    python3Packages.rpi-gpio
+    python3Packages.datetime
     updog
 
     # NixOS
@@ -224,6 +306,7 @@ in {
     #gcc    
     #gnumake
     clinfo
+    smuview  # Multimeter
   ];
 }
 
