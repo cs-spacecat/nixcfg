@@ -5,15 +5,18 @@ let
   password = "";
   hostname = "";
   cloudflareToken = "";
-  lang = "";
+  vscodeToken = "";
+  lang = "de_DE.UTF-8";
+  nixVer = "24.05";
 
 in {
   imports = [
     "${fetchTarball "https://github.com/NixOS/nixos-hardware/tarball/master"}/raspberry-pi/4"
   ];
   hardware.enableRedistributableFirmware = true;
-  system.stateVersion = "24.05";
-
+  system.stateVersion = nixVer;
+  nixpkgs.config.allowUnfree = true;
+	
 
   # --- Networking ---
   networking = {
@@ -22,11 +25,13 @@ in {
     firewall.allowedTCPPorts = [
       22  # ssh
       631  # cups open port
+      3401  # vscode Server
       4918  # HTTPS WebDAV server
     ];
     firewall.allowedUDPPorts = [
       22  # ssh
       631  # cups open port
+      3401  # vscode Server
       4918  # HTTPS WebDAV server
     ];
   };
@@ -51,11 +56,39 @@ in {
     serviceConfig = {
       #ExecStart = "${pkgs.dufs}/bin/dufs -p 4918 -a ${user}:${password}@/home/${user}/webDAV:rw --allow-delete --allow-upload --allow-search --allow-archive";
       WorkingDirectory = "/home/${user}/webDAV";
-      ExecStart = "${pkgs.dufs}/bin/dufs -p 4918 -a ${user}:${password}@/:rw --allow-delete --allow-upload --allow-search --allow-archive";
+      ExecPre = "mkdir -p /home/${user}/webDAV";  # create folder if not exists
+      #ExecStart = "${pkgs.dufs}/bin/dufs -p 4918 -a ${user}:${password}@/:rw --allow-delete --allow-upload --allow-search --allow-archive";
+      ExecStart = "${pkgs.dufs}/bin/dufs -p 443 -a ${user}:${password}@/:rw -A";
       Restart = "always";
       RestartSec = "10s";
     };
   };
+
+  # --- quick Upload server ---
+  systemd.services.dufs-webdav2 = {
+    description = "dufs WebDAV Server";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      WorkingDirectory = "/home/${user}/quickUP";
+      ExecPre = "mkdir -p /home/${user}/quickUP";  # create folder if not exists 
+      ExecStart = "${pkgs.dufs}/bin/dufs -p 444 --allow-upload";
+      Restart = "always";
+      RestartSec = "10s";
+    };
+  };
+
+  # --- VSCode server ---
+  #services.openvscode-server = {
+  #  enable = true;
+  #  port = 3401;
+  #  user = user;
+  #  connectionToken = vscodeToken;
+  #  serverDataDir = "/home/${user}/openVSCode";
+  #  #extraArguments = "--update-extensions";
+  #  host = "127.0.0.1";
+  #};
+  
 
   # --- CUPS printing service ---
   services.printing.enable = true;
@@ -89,10 +122,6 @@ in {
 		browsing = true;
 		defaultShared = true;
 	};
-	#networking.firewall = {  # open ports to that you can access the printer via IPP
-	#	allowedTCPPorts = [ 631 ];
-	#	allowedUDPPorts = [ 631 ];
-	#};
 	hardware.printers = {
     ensurePrinters = [{  # add printer declaratively, so that it always appears
       name = "Laserjet-2200";
@@ -148,7 +177,7 @@ in {
     btop
     cloudflared
     dufs
-    cups
+    vscode
   ];
 
   boot = {
