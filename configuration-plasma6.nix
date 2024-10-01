@@ -3,16 +3,15 @@
 let
   user = "";
   hostname = "";
-  lang = "de_DE.UTF-8";
+  lang = "";
   gitEmail = "";
   gitUser = "";
-  nixVer = "24.05";
+  nixVer = "";
 in {
   imports = [
       ./hardware-configuration.nix
       (import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-${nixVer}.tar.gz"}/nixos")
     ];
-
 
   # ------ test place -----------
   services.udev.packages = [ pkgs.streamdeck-ui ];
@@ -283,6 +282,7 @@ in {
 
     # ui
     simp1e-cursors
+    banana-cursor
     utterly-round-plasma-style
 
     # python libs
