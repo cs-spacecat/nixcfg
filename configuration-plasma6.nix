@@ -6,8 +6,8 @@ let
   lang = "";
   gitEmail = "";
   gitUser = "";
-  nixVer = "unstable";
-  nix-gaming = import (builtins.fetchTarball "https://github.com/fufexan/nix-gaming/archive/master.tar.gz");
+  nixVer = "";
+  #nix-gaming = import (builtins.fetchTarball "https://github.com/fufexan/nix-gaming/archive/master.tar.gz");
 
 in {
   imports = [
@@ -140,7 +140,6 @@ in {
     #steam.remotePlay.openFirewall = true;
 
     steam.enable = true;
-    firefox.enable = true;
     chromium.enable = true;
     adb.enable = true;
     gnupg.agent.enable = true;
@@ -149,29 +148,6 @@ in {
     streamdeck-ui.enable = true;
     #streamdeck-ui.autoStart = true;
     kdeconnect.enable = true;
-
-    chromium = {
-      defaultSearchProviderSearchURL = "https://encrypted.google.com/search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}{google:instantExtendedEnabledParameter}ie={inputEncoding}";
-      defaultSearchProviderSuggestURL = "https://encrypted.google.com/complete/search?output=chrome&q={searchTerms}";
-      extensions = [
-        "cjpalhdlnbpafiamejdnhcphjbkeiagm"  # Ublock Origin
-        "edibdbjcniadpccecjdfdjjppcpchdlm"  # I still don't care about cookies
-        "fhkphphbadjkepgfljndicmgdlndmoke"  # Font Fingerprint Defender
-        "hdhngoamekjhmnpenphenpaiindoinpo"  # CookieManager
-        "gebbhagfogifgggkldgodflihgfeippi"  # Return YouTube Dislike
-        "mnjggcdmjocbbbhaepdhchncahnbgone"  # SponsorBlock for YouTube
-        "kdbmhfkmnlmbkgbabkdealhhbfhlmmon"  # SteamDB
-        "fcphghnknhkimeagdglkljinmpbagone"  # YouTube Auto HD
-      ];
-      extraOpts = {
-        "ExtensionManifestV2Availability" = 2;
-        "SpellcheckEnabled" = true;
-        "SpellcheckLanguage" = [
-          "de"
-          "en-US"
-        ];
-      };
-    };
 
     gnupg.agent = {
       pinentryPackage = pkgs.pinentry-qt;
@@ -342,8 +318,6 @@ in {
     aspellDicts.en-science
     aspellDicts.en-computers
 
-    # nix-gaming
-    nix-gaming.packages.${pkgs.hostPlatform.system}.technic-launcher
     jdk21_headless
     prelink
 
