@@ -6,12 +6,15 @@ let
   lang = "";
   gitEmail = "";
   gitUser = "";
-  nixVer = "";
+  nixVer = "unstable";
+  nix-gaming = import (builtins.fetchTarball "https://github.com/fufexan/nix-gaming/archive/master.tar.gz");
+
 in {
   imports = [
       ./hardware-configuration.nix
-      (import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-${nixVer}.tar.gz"}/nixos")
+      #(import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-{nixVer}.tar.gz"}/nixos")
     ];
+
 
   # ------ test place -----------
   services.udev.packages = [ pkgs.streamdeck-ui ];
@@ -84,6 +87,8 @@ in {
   virtualisation.spiceUSBRedirection.enable = true;  # vm USB passthrough
   systemd.services.atuin.enable = true;
   services = {
+    vnstat.enable = true;
+    printing.enable = true;
     xserver = {
       enable = true;  # Enable the X11 windowing system.
       xkb.layout = "de";  # German Keymap
@@ -135,12 +140,38 @@ in {
     #steam.remotePlay.openFirewall = true;
 
     steam.enable = true;
+    firefox.enable = true;
+    chromium.enable = true;
     adb.enable = true;
     gnupg.agent.enable = true;
     zsh.enable = true;
     virt-manager.enable = true;
     streamdeck-ui.enable = true;
     #streamdeck-ui.autoStart = true;
+    kdeconnect.enable = true;
+
+    chromium = {
+      defaultSearchProviderSearchURL = "https://encrypted.google.com/search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}{google:instantExtendedEnabledParameter}ie={inputEncoding}";
+      defaultSearchProviderSuggestURL = "https://encrypted.google.com/complete/search?output=chrome&q={searchTerms}";
+      extensions = [
+        "cjpalhdlnbpafiamejdnhcphjbkeiagm"  # Ublock Origin
+        "edibdbjcniadpccecjdfdjjppcpchdlm"  # I still don't care about cookies
+        "fhkphphbadjkepgfljndicmgdlndmoke"  # Font Fingerprint Defender
+        "hdhngoamekjhmnpenphenpaiindoinpo"  # CookieManager
+        "gebbhagfogifgggkldgodflihgfeippi"  # Return YouTube Dislike
+        "mnjggcdmjocbbbhaepdhchncahnbgone"  # SponsorBlock for YouTube
+        "kdbmhfkmnlmbkgbabkdealhhbfhlmmon"  # SteamDB
+        "fcphghnknhkimeagdglkljinmpbagone"  # YouTube Auto HD
+      ];
+      extraOpts = {
+        "ExtensionManifestV2Availability" = 2;
+        "SpellcheckEnabled" = true;
+        "SpellcheckLanguage" = [
+          "de"
+          "en-US"
+        ];
+      };
+    };
 
     gnupg.agent = {
       pinentryPackage = pkgs.pinentry-qt;
@@ -200,14 +231,14 @@ in {
     };
   };
 
-  home-manager.users.spacecat = {
-    home.stateVersion = nixVer;
-    programs.git = {
-      enable = true;
-      userEmail = gitEmail;
-      userName = gitUser;
-    };
-  };
+  #home-manager.users.spacecat = {
+  #  home.stateVersion = nixVer;
+  #  programs.git = {
+  #    enable = true;
+  #    userEmail = gitEmail;
+  #    userName = gitUser;
+  #  };
+  #};
   
   fonts = {  # copied from https://github.com/ChrisTitusTech/nixos-titus/blob/main/system/configuration.nix
     packages = with pkgs; [
@@ -241,7 +272,8 @@ in {
     #print-manager
   ];
   environment.systemPackages = with pkgs; [
-    google-chrome
+    # google-chrome
+    firefox
     streamdeck-ui
     discord
     steam
@@ -254,6 +286,7 @@ in {
     keepassxc
     arduino
     inkscape-with-extensions
+    ungoogled-chromium
 
     # cli
     usbutils  # lsusb
@@ -271,7 +304,10 @@ in {
     cowsay
     sl
     p7zip  # 7z support
+    jq
     #mpvpaper
+    protontricks
+    wine
 
     # kde
 
@@ -292,6 +328,11 @@ in {
     python3Packages.datetime
     updog
 
+    # lua
+    lua
+    
+
+
     # NixOS
     home-manager
 
@@ -301,7 +342,14 @@ in {
     aspellDicts.en-science
     aspellDicts.en-computers
 
+    # nix-gaming
+    nix-gaming.packages.${pkgs.hostPlatform.system}.technic-launcher
+    jdk21_headless
+    prelink
+
     # remove l8r
+    krfb  # for kde connect
+    #plasma5Packages.kdeconnect-kde
     #cmake  
     #gcc    
     #gnumake
