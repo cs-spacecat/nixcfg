@@ -8,7 +8,6 @@ let
   gitUser = "";
   nixVer = "";
   #nix-gaming = import (builtins.fetchTarball "https://github.com/fufexan/nix-gaming/archive/master.tar.gz");
-
 in {
   imports = [
       ./hardware-configuration.nix
@@ -22,15 +21,7 @@ in {
   # doesent work sadly
   #system.userActivationScripts.script.text = "mpvpaper '*' wp8214759.mp4 -p -o 'no-audio --loop-playlist'";
 
-  #hardware.opengl = { # hardware.graphics on unstable
-  #  enable = true;
-  #  extraPackages = with pkgs; [
-  #    intel-media-driver # LIBVA_DRIVER_NAME=iHD
-  #    intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
-  #    libvdpau-va-gl
-  #  ];
-  #};
-
+  sound.enable = true;
   # ---- end test place ---------
 
   system.stateVersion = nixVer;
@@ -45,7 +36,7 @@ in {
   console.keyMap = "de";   # Configure console keymap
 
 
-
+  boot.extraModulePackages = with config.boot.kernelPackages; [ usbip ];
   # Bootloader.
   boot.loader.grub = {
     enable = true;
@@ -140,14 +131,16 @@ in {
     #steam.remotePlay.openFirewall = true;
 
     steam.enable = true;
+    firefox.enable = true;  # drag and drop support
     chromium.enable = true;
     adb.enable = true;
     gnupg.agent.enable = true;
-    zsh.enable = true;
     virt-manager.enable = true;
     streamdeck-ui.enable = true;
+    streamdeck-ui.autoStart = true;
     #streamdeck-ui.autoStart = true;
     kdeconnect.enable = true;
+    nix-ld.enable = true;  # run unpached dynamic non-nix packages
 
     gnupg.agent = {
       pinentryPackage = pkgs.pinentry-qt;
@@ -158,14 +151,15 @@ in {
     };
 
     zsh = {
+      enable = true;
       enableCompletion = true;
       autosuggestions.enable = true;
       syntaxHighlighting.enable = true;
       enableBashCompletion = true;
       shellAliases = {
-        rebuild   = "sudo nixos-rebuild switch --show-trace";
-        clean     = "nix-store --gc";
-        configure = "sudo nano /etc/nixos/configuration.nix && rebuild";
+        rebuild   = "sudo time nixos-rebuild switch --show-trace";
+        clean     = "time nix-store --gc && sudo time nix-collect-garbage -d";
+        configure = "sudo nano /etc/nixos/configuration.nix && time rebuild";
         o         = "xdg-open . &";
         open      = "xdg-open . &";
         sl        = "${pkgs.sl}/bin/sl -Gw";
@@ -225,6 +219,7 @@ in {
       source-han-sans
       source-han-sans-japanese
       source-han-serif-japanese
+      #whatsapp-emoji-font
       (nerdfonts.override {fonts = ["Meslo"];})
     ];
     fontconfig = {
@@ -241,6 +236,7 @@ in {
     xterm
   ];
   environment.plasma6.excludePackages = with pkgs.kdePackages; [
+    plasma-systemmonitor
     elisa
     khelpcenter
     kwrited
@@ -248,7 +244,6 @@ in {
     #print-manager
   ];
   environment.systemPackages = with pkgs; [
-    # google-chrome
     firefox
     streamdeck-ui
     discord
@@ -262,11 +257,13 @@ in {
     keepassxc
     arduino
     inkscape-with-extensions
-    ungoogled-chromium
+    kdePackages.merkuro  # email & calendar
+    mission-center  # better taskmanager
+    bitwarden-desktop
 
     # cli
     usbutils  # lsusb
-    fzf
+    fzf  # fuzzy finder
     wget
     file
     unzip
@@ -280,10 +277,10 @@ in {
     cowsay
     sl
     p7zip  # 7z support
+    unrar-wrapper  # cli support for rar archives
     jq
     #mpvpaper
-    protontricks
-    wine
+    exfatprogs  # exfat support (needed at least for gparted)
 
     # kde
 
@@ -302,12 +299,15 @@ in {
     python311Packages.pyserial
     python3Packages.rpi-gpio
     python3Packages.datetime
+    python3Packages.zipfile2
+    python3Packages.requests
     updog
 
     # lua
     lua
-    
 
+    # games
+    ckan  # ksp mod manager
 
     # NixOS
     home-manager
@@ -318,17 +318,15 @@ in {
     aspellDicts.en-science
     aspellDicts.en-computers
 
-    jdk21_headless
-    prelink
-
     # remove l8r
     krfb  # for kde connect
-    #plasma5Packages.kdeconnect-kde
     #cmake  
     #gcc    
     #gnumake
     clinfo
     smuview  # Multimeter
+    wine
+    wine64
   ];
 }
 
