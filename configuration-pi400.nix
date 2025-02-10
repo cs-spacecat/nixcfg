@@ -6,6 +6,7 @@ let
   hostname        = "";
   disk            = "";
   cloudflareToken = "";
+  ssh_keys        = [ "" ];
   vscodeToken     = "";
   lang            = "de_DE.UTF-8";
   nixVer          = "24.11";
@@ -19,7 +20,7 @@ in {
   system.stateVersion = nixVer;
   nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
-	
+
 
   # --- Networking ---
   networking = {
@@ -82,6 +83,7 @@ in {
     config = {
       ROCKET_ADRESS = "127.0.0.1";
       ROCKET_PORT = 8222;
+      EXPERIMENTAL_CLIENT_FEATURE_FLAGS = "ssh-key-vault-item,ssh-agent";
     };
   };
 
@@ -125,6 +127,7 @@ in {
       location = "Wohnzimmer Wandschrank";
       deviceUri = "usb://HP/LaserJet%202200?serial=00CNHRB43441";
       model = "HP/hp-laserjet_2200_series.ppd.gz";  #ls /nix/store/*-hplip-*/share/cups/model/HP/ | grep laserjet_2200    "HP/hp-laserjet_2200-ps.ppd.gz"  "HP/hp-laserjet_2200_series.ppd.gz"  "HP/hp-laserjet_2200_series-ps.ppd.gz"
+      #model = "${pkgs.hplip}/share/cups/model/HP/hp-laserjet_2200_series-ps.ppd.gz";
       ppdOptions = {
         PageSize = "A4";
         #Duplex = "DuplexNoTumble";
@@ -133,8 +136,13 @@ in {
   };
 
   # ---- OpenSSH ----
-  services.openssh.settings.PermitRootLogin = "yes";
-  services.openssh.enable = true;  # for sftp editing this file
+  services.openssh = {
+    settings.PermitRootLogin = "yes";
+    enable = true;  # for sftp editing this file
+    settings = {
+      PasswordAuthentication = false;
+    };
+  };
 
   # ---- Cloudflared ----
   systemd.services.cloudflared_tunnel = {  # for publicly hosting local websites
@@ -204,6 +212,7 @@ in {
     cloudflared
     dufs
     vscode
+    cups
   ];
 
   boot = {
@@ -221,10 +230,14 @@ in {
     users."${user}" = {
       isNormalUser = true;
       password = password;
-      extraGroups = [ "wheel"];  # "docker"
+      extraGroups = [ "wheel" ];  # "docker"
       shell = pkgs.zsh;
+      openssh.authorizedKeys.keys = ssh_keys;
     };
-    users."root".password = password;
+    users."root" = {
+      password = password;
+      extraGroups = [ "wheel" ];
+    };
   };
 
   time.timeZone = "Europe/Berlin";
