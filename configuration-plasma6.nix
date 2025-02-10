@@ -6,7 +6,7 @@ let
   lang = "";
   gitEmail = "";
   gitUser = "";
-  nixVer = "";
+  nixVer = "unstable";
   #nix-gaming = import (builtins.fetchTarball "https://github.com/fufexan/nix-gaming/archive/master.tar.gz");
 in {
   imports = [
@@ -21,12 +21,12 @@ in {
   # doesent work sadly
   #system.userActivationScripts.script.text = "mpvpaper '*' wp8214759.mp4 -p -o 'no-audio --loop-playlist'";
 
-  sound.enable = true;
+  #sound.enable = true;
   # ---- end test place ---------
 
   system.stateVersion = nixVer;
   system.autoUpgrade.enable = true;  # enable auto updates
-  system.userActivationScripts.zshrc = "touch .zshrc";   # Prevent the new user dialog in zsh
+  system.userActivationScripts.zshrc = "touch /home/${user}/.zshrc";   # Prevent the new user dialog in zsh
   fileSystems."/run/media/spacecat/4tb-hdd".device = "/dev/disk/by-uuid/1c16e4a2-6027-4f80-b880-b37395562a0a";   # Automount HDD
   security.rtkit.enable = true;
   nixpkgs.config.allowUnfree = true;
@@ -154,6 +154,7 @@ in {
       enable = true;
       enableCompletion = true;
       autosuggestions.enable = true;
+      histFile = "";  # disable zsh history, instead using atuin as history "manager"
       syntaxHighlighting.enable = true;
       enableBashCompletion = true;
       shellAliases = {
@@ -187,16 +188,17 @@ in {
           fi
         }
       '';
-        ohMyZsh = {
-        enable = true;
-        theme = "gnzh";
-        plugins = [
-          "git"
-          #"history"
-        ];
-      };
+      ohMyZsh = {
+      enable = true;
+      theme = "gnzh";
+      plugins = [
+        "git"
+        #"history"
+      ];
+    };
     promptInit = ''
         eval "$(atuin init zsh)"
+        export SSH_AUTH_SOCK=/home/${user}/.bitwarden-ssh-agent.sock
       '';
     };
   };
@@ -213,7 +215,7 @@ in {
   fonts = {  # copied from https://github.com/ChrisTitusTech/nixos-titus/blob/main/system/configuration.nix
     packages = with pkgs; [
       noto-fonts
-      noto-fonts-cjk
+      noto-fonts-cjk-sans
       noto-fonts-emoji
       font-awesome
       source-han-sans
@@ -265,6 +267,7 @@ in {
     usbutils  # lsusb
     fzf  # fuzzy finder
     wget
+    zsh-nix-shell  # zsh in the nixshell, duuh
     file
     unzip
     pstree
@@ -281,6 +284,9 @@ in {
     jq
     #mpvpaper
     exfatprogs  # exfat support (needed at least for gparted)
+    gh  # github authentication
+    openjdk17-bootstrap  # java
+    yazi  # terminal file manager
 
     # kde
 
@@ -296,7 +302,7 @@ in {
 
     # python libs
     python3
-    python311Packages.pyserial
+    python312Packages.pyserial
     python3Packages.rpi-gpio
     python3Packages.datetime
     python3Packages.zipfile2
@@ -321,7 +327,7 @@ in {
     # remove l8r
     krfb  # for kde connect
     #cmake  
-    #gcc    
+    gcc    
     #gnumake
     clinfo
     smuview  # Multimeter
@@ -329,4 +335,3 @@ in {
     wine64
   ];
 }
-
