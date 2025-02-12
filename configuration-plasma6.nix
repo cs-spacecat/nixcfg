@@ -6,12 +6,14 @@ let
   lang = "";
   gitEmail = "";
   gitUser = "";
-  nixVer = "unstable";
+  gitPubKey = "";
+  nixVer = "";
+  homeVersion = "";
   #nix-gaming = import (builtins.fetchTarball "https://github.com/fufexan/nix-gaming/archive/master.tar.gz");
 in {
   imports = [
       ./hardware-configuration.nix
-      #(import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-{nixVer}.tar.gz"}/nixos")
+      (import "${builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-${homeVersion}.tar.gz"}/nixos")
     ];
 
 
@@ -20,7 +22,6 @@ in {
 
   # doesent work sadly
   #system.userActivationScripts.script.text = "mpvpaper '*' wp8214759.mp4 -p -o 'no-audio --loop-playlist'";
-
   #sound.enable = true;
   # ---- end test place ---------
 
@@ -47,6 +48,7 @@ in {
   users.users.spacecat = {
     isNormalUser = true;
     description = "spacecat";
+    openssh.authorizedKeys.keys = [ gitPubKey ];  # for git
     extraGroups = [ "networkmanager" "wheel" "dialout" "adbusers" "libvirtd" "video" ];
     shell = pkgs.zsh;
     packages = with pkgs; [ ];
@@ -103,21 +105,6 @@ in {
     };
     # --- davfs (mount webdav as filesystem) ---
     davfs2.enable = true;
-    #systemd.services.davfs = {
-    #  Description = "Mount WebDAV Service";
-    #  After = [ "network-online.target" ];
-    #  Wants= [ "network-online.target" ];
-
-    #  [Mount]
-    #  What=http(s)://address:<port>/path
-    #  Where=/mnt/webdav/service
-    #  Options=uid=1000,file_mode=0664,dir_mode=2775,grpid
-    #  Type=davfs
-    #  TimeoutSec=15
-
-    #  [Install]
-    #  WantedBy=multi-user.target
-    #};
   };
   hardware = {
     cpu.amd.updateMicrocode = true;
@@ -203,14 +190,23 @@ in {
     };
   };
 
-  #home-manager.users.spacecat = {
-  #  home.stateVersion = nixVer;
-  #  programs.git = {
-  #    enable = true;
-  #    userEmail = gitEmail;
-  #    userName = gitUser;
-  #  };
-  #};
+  home-manager.users.${user} = {
+    home.stateVersion = homeVersion;
+    # --- git ---
+    home.file.".config/git/allowed_signers".text = "${gitEmail} ${gitPubKey}"; 
+    programs.git = {
+      enable = true;
+      userEmail = gitEmail;
+      userName = gitUser;
+      extraConfig = {
+        gpg           = { "format" = "ssh"; };
+        user          = { "signingkey" = gitPubKey; };
+        commit        = { "gpgsign" = true; };
+        tag           = { "gpgsign" = true; };
+        "gpg \"ssh\"" = { "allowedSignersFile" = "/home/${user}/.config/git/allowed_signers"; };
+      };
+    };
+  };
   
   fonts = {  # copied from https://github.com/ChrisTitusTech/nixos-titus/blob/main/system/configuration.nix
     packages = with pkgs; [
@@ -335,3 +331,4 @@ in {
     wine64
   ];
 }
+
