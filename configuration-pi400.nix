@@ -16,11 +16,61 @@ in {
     "${fetchTarball "https://github.com/NixOS/nixos-hardware/tarball/master"}/raspberry-pi/4"
     #./hardware-configuration.nix
   ];
+
+  #  --- Test ---
+  # Create gpio group
+  users.groups.gpio = {};
+  #boot.loader.raspberryPi.firmwareConfig = ' dtoverlay=pwm ';
+  # Change permissions gpio devices
+  services.udev.extraRules = ''
+    SUBSYSTEM=="bcm2835-gpiomem", KERNEL=="gpiomem", GROUP="gpio",MODE="0660"
+    SUBSYSTEM=="gpio", KERNEL=="gpiochip*", ACTION=="add", RUN+="${pkgs.bash}/bin/bash -c 'chown root:gpio /sys/class/gpio/export /sys/class/gpio/unexport ; chmod 220 /sys/class/gpio/export /sys/class/gpio/unexport'"
+    SUBSYSTEM=="gpio", KERNEL=="gpio*", ACTION=="add",RUN+="${pkgs.bash}/bin/bash -c 'chown root:gpio /sys%p/active_low /sys%p/direction /sys%p/edge /sys%p/value ; chmod 660 /sys%p/active_low /sys%p/direction /sys%p/edge /sys%p/value'"
+  '';
+
+  #  --- Only Office ---
+  #services.onlyoffice = {
+  #  port = 8012;
+  #  hostname = "127.0.0.1";
+  #  enable = true;
+  #  enableExampleServer = true;
+  #  examplePort = 8013;
+  #};
+
+  #  --- Tailscale ---
+  #networking.firewall.checkReversePath = "loose";
+  boot.kernel.sysctl = { # important for forwarding routes!
+    "net.ipv6.conf.all.forwarding" = "1";
+    "net.ipv4.ip_forward" = "1";
+  };
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+    useRoutingFeatures = "server";
+    extraSetFlags = [ 
+      "--accept-routes"
+      "--advertise-connector"
+      "--advertise-exit-node"
+      "--operator=${user}"
+      "--advertise-routes=192.168.178.0/24"     #   change me !!!!!!!
+      "--ssh"
+    ];
+    extraUpFlags = [ "--ssh" ];
+    extraDaemonFlags = [ ];
+  };
+
+
+
   hardware.enableRedistributableFirmware = true;
+  hardware.raspberry-pi."4".apply-overlays-dtmerge.enable = true;  # gpio
+  hardware.deviceTree = {  # gpio
+    enable = true;
+    filter = "*-rpi-*.dtb";
+  };
   system.stateVersion = nixVer;
   nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
-
+	
 
   # --- Networking ---
   networking = {
@@ -32,7 +82,9 @@ in {
       631  # cups open port
       3401  # vscode Server
       4918  # HTTPS WebDAV server
+      4444  # quickUP WebDAV
       9090  # updog
+      41641 # tailscale
     ];
     firewall.allowedUDPPorts = [
       22  # ssh
@@ -40,7 +92,42 @@ in {
       3401  # vscode Server
       4918  # HTTPS WebDAV server
       9090  # updog
+      41641 # tailscale
     ];
+    firewall.checkReversePath = "loose";
+  };
+
+  # --- Syncthing ---
+  services.syncthing = {
+    enable = true;
+    user = "${user}";
+    overrideFolders = false;
+    overrideDevices = false;
+    settings.options.urAccepted = 5;
+    options.relaysEnabled = true;
+    options.localAnnounceEnabled = true;
+    openDefaultPorts = true;
+    dataDir = "/home/${user}/syncthing";
+    configDir = "/home/${user}/.config/syncthing";
+    guiAddress = "127.0.0.1:8384";
+    extraFlags = [ ];
+    settings.devices = {
+      "handy" = { id = "7NCAMAL-HKUX2AB-J6QYDWP-H6EKRGT-O4R6QNZ-FS63QV6-QEMCWPB-NDD6QQR"; };
+    };
+    options.settings.gui = {
+      user = "${user}";
+      password = "${password}";
+    };
+    settings.folders = {
+      "falken-drive" = {
+        path = "/home/${user}/syncthing/falken-drive";
+        devices = [ "handy" ];
+        versioning = {
+          type = "trashcan";
+          params.cleanoutDays = "1000";
+        };
+      };
+    };
   };
 
 
@@ -50,10 +137,8 @@ in {
     after = [ "network.target" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      #ExecStart = "${pkgs.dufs}/bin/dufs -p 4918 -a ${user}:${password}@/home/${user}/webDAV:rw --allow-delete --allow-upload --allow-search --allow-archive";
       WorkingDirectory = "/home/${user}/webDAV";
       ExecPre = "mkdir -p /home/${user}/webDAV";  # create folder if not exists
-      #ExecStart = "${pkgs.dufs}/bin/dufs -p 4918 -a ${user}:${password}@/:rw --allow-delete --allow-upload --allow-search --allow-archive";
       ExecStart = "${pkgs.dufs}/bin/dufs -p 443 -a ${user}:${password}@/:rw -A";
       Restart = "always";
       RestartSec = "10s";
@@ -144,6 +229,19 @@ in {
     };
   };
 
+
+  # ---- led strip display ----
+  systemd.services.ledstripController = {
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.python3} /home/spacecat/ledstripController/main.py";
+      Restart = "always";
+      RestartSec = "10s";
+      User = "root";
+    };
+  };
+
   # ---- Cloudflared ----
   systemd.services.cloudflared_tunnel = {  # for publicly hosting local websites
     wantedBy = [ "multi-user.target" ];
@@ -209,15 +307,33 @@ in {
   environment.systemPackages = with pkgs; [
     zsh
     btop
-    cloudflared
     dufs
+    libraspberrypi
+
+    cloudflared
     vscode
+    onlyoffice-documentserver
     cups
+    tailscale
+    vaultwarden
+    (python3.withPackages (p: with p; [
+      rpi-gpio
+      pip
+      pyserial
+    ]))
+    #
+    wget
+    git
+    gcc
+    zulu23  # java
+    libraspberrypi
+    screen
   ];
 
   boot = {
     kernelPackages = pkgs.linuxKernel.packages.linux_rpi4;
-    initrd.availableKernelModules = [ "xhci_pci" "usbhid" "usb_storage" ];
+    kernelModules = [ "pwm_bcm2835" "w1-gpio" ];
+    initrd.availableKernelModules = [ "xhci_pci" "usbhid" "usb_storage" "bcm2835_dma" "vc4" ];
     loader = {
       grub.enable = false;
       generic-extlinux-compatible.enable = true;
@@ -230,7 +346,7 @@ in {
     users."${user}" = {
       isNormalUser = true;
       password = password;
-      extraGroups = [ "wheel" ];  # "docker"
+      extraGroups = [ "wheel" "gpio" ];  # "docker"
       shell = pkgs.zsh;
       openssh.authorizedKeys.keys = ssh_keys;
     };
